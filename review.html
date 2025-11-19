@@ -209,8 +209,9 @@
         const imageUrl = urlParams.get('imageUrl') ? decodeURIComponent(urlParams.get('imageUrl')) : '';
         const customerRequest = urlParams.get('customerRequest') || '未知需求';
 
-        // n8n Webhook URL - 请替换为您的实际Webhook地址
-        const N8N_WEBHOOK_URL = 'https://您的n8n实例地址/webhook/审核结果';
+        // ✅ 已配置您的Webhook URL
+        const APPROVE_WEBHOOK_URL = 'http://localhost:5678/webhook/8208c765-fa63-49ec-9c77-642ab9050333';
+        const REJECT_WEBHOOK_URL = 'http://localhost:5678/webhook/e9d9ff48-0821-4ad7-b3c9-4ce92583ecfe';
 
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
@@ -259,7 +260,7 @@
             
             try {
                 // 发送审核结果到n8n
-                const response = await fetch(N8N_WEBHOOK_URL, {
+                const response = await fetch(APPROVE_WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -268,7 +269,9 @@
                         orderId: orderId,
                         status: 'approved',
                         decisionTime: new Date().toISOString(),
-                        reviewer: '人工审核员'
+                        reviewer: '人工审核员',
+                        imageUrl: imageUrl,
+                        customerRequest: customerRequest
                     })
                 });
                 
@@ -306,7 +309,7 @@
             
             try {
                 // 发送修改要求到n8n
-                const response = await fetch(N8N_WEBHOOK_URL, {
+                const response = await fetch(REJECT_WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -316,7 +319,9 @@
                         status: 'rejected',
                         feedback: feedback,
                         decisionTime: new Date().toISOString(),
-                        reviewer: '人工审核员'
+                        reviewer: '人工审核员',
+                        imageUrl: imageUrl,
+                        customerRequest: customerRequest
                     })
                 });
                 
