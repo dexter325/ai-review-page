@@ -10,14 +10,14 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -26,39 +26,39 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-        
+
         .header {
             background: #2c3e50;
             color: white;
             padding: 30px;
             text-align: center;
         }
-        
+
         .header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
         }
-        
+
         .content {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
             padding: 30px;
         }
-        
+
         @media (max-width: 768px) {
             .content {
                 grid-template-columns: 1fr;
             }
         }
-        
+
         .info-panel, .image-panel {
             background: #f8f9fa;
             padding: 25px;
             border-radius: 10px;
             border-left: 4px solid #3498db;
         }
-        
+
         .info-item {
             margin-bottom: 20px;
             padding: 15px;
@@ -66,19 +66,19 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        
+
         .info-label {
             font-weight: bold;
             color: #2c3e50;
             display: block;
             margin-bottom: 5px;
         }
-        
+
         .info-value {
             color: #34495e;
             word-break: break-all;
         }
-        
+
         .image-container {
             text-align: center;
             margin-bottom: 20px;
@@ -88,7 +88,7 @@
             justify-content: center;
             align-items: center;
         }
-        
+
         #previewImage {
             max-width: 100%;
             max-height: 400px;
@@ -97,7 +97,7 @@
             border: 3px solid #bdc3c7;
             display: none;
         }
-        
+
         .diagnostic-info {
             background: #f8f9fa;
             padding: 15px;
@@ -106,7 +106,7 @@
             display: none;
             width: 100%;
         }
-        
+
         .diagnostic-item {
             margin: 8px 0;
             padding: 8px;
@@ -114,32 +114,32 @@
             border-radius: 4px;
             font-size: 14px;
         }
-        
+
         .success {
             background: #d4edda;
             color: #155724;
             border-left: 4px solid #28a745;
         }
-        
+
         .error {
             background: #f8d7da;
             color: #721c24;
             border-left: 4px solid #dc3545;
         }
-        
+
         .warning {
             background: #fff3cd;
             color: #856404;
             border-left: 4px solid #ffc107;
         }
-        
+
         .action-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 30px;
+            margin-top: 20px;
         }
-        
+
         .btn {
             padding: 15px 25px;
             border: none;
@@ -151,17 +151,17 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         .btn-approve {
             background: linear-gradient(135deg, #2ecc71, #27ae60);
             color: white;
         }
-        
+
         .btn-reject {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
         }
-        
+
         .btn-retry {
             background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
@@ -169,7 +169,7 @@
             font-size: 14px;
             margin-top: 10px;
         }
-        
+
         .btn-diagnostic {
             background: linear-gradient(135deg, #f39c12, #e67e22);
             color: white;
@@ -177,12 +177,12 @@
             font-size: 14px;
             margin-top: 10px;
         }
-        
+
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
-        
+
         .status-message {
             padding: 15px;
             margin: 20px 0;
@@ -191,13 +191,13 @@
             font-weight: bold;
             display: none;
         }
-        
+
         .loading {
             text-align: center;
             padding: 20px;
             color: #7f8c8d;
         }
-        
+
         .diagnostic-section {
             margin-top: 20px;
             padding: 15px;
@@ -205,314 +205,303 @@
             border-radius: 8px;
             display: none;
         }
+
+        .feedback-panel {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🖼️ AI图片审核系统</h1>
-            <p>请仔细审核生成的AI图片内容</p>
-        </div>
-        
-        <div class="content">
-            <div class="info-panel">
-                <h2>📋 订单信息</h2>
-                <div class="info-item">
-                    <span class="info-label">订单号：</span>
-                    <span class="info-value" id="orderIdDisplay">加载中...</span>
-                </div>
-                
-                <div class="info-item">
-                    <span class="info-label">客户需求：</span>
-                    <span class="info-value" id="customerRequestDisplay">加载中...</span>
-                </div>
-                
-                <div class="info-item">
-                    <span class="info-label">生成时间：</span>
-                    <span class="info-value" id="timestampDisplay">加载中...</span>
-                </div>
-                
-                <div class="info-item">
-                    <span class="info-label">图片URL：</span>
-                    <span class="info-value" id="imageUrlDisplay" style="font-size: 12px; word-break: break-all;">加载中...</span>
-                </div>
-                
-                <button class="btn btn-diagnostic" id="toggleDiagnostic">显示诊断信息</button>
-            </div>
-            
-            <div class="image-panel">
-                <h2>🖼️ 图片预览</h2>
-                <div class="image-container">
-                    <img id="previewImage" src="" alt="AI生成图片">
-                    <div class="loading" id="imageLoading">图片加载中...</div>
-                    <button class="btn btn-retry" id="retryButton" style="display: none;">🔄 重新加载图片</button>
-                    
-                    <div class="diagnostic-info" id="diagnosticInfo">
-                        <h4>图片诊断信息</h4>
-                        <div class="diagnostic-item" id="urlFormatCheck">URL格式检查：等待中...</div>
-                        <div class="diagnostic-item" id="urlAccessCheck">URL可访问性检查：等待中...</div>
-                        <div class="diagnostic-item" id="imageLoadCheck">图片加载检查：等待中...</div>
-                    </div>
-                </div>
-                
-                <div class="diagnostic-section" id="detailedDiagnostic">
-                    <h3>详细诊断信息</h3>
-                    <div id="detailedDiagnosticContent"></div>
-                </div>
-                
-                <div class="action-buttons">
-                    <button class="btn btn-approve" onclick="approveImage()">✅ 审核通过</button>
-                    <button class="btn btn-reject" onclick="rejectImage()">❌ 要求修改</button>
-                </div>
-                
-                <div id="statusMessage" class="status-message"></div>
-            </div>
-        </div>
+<div class="container">
+    <div class="header">
+        <h1>🖼️ AI图片审核系统</h1>
+        <p>请仔细审核生成的AI图片内容</p>
     </div>
 
-    <script>
-        // 从URL参数获取数据
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('orderId');
-        const imageUrl = urlParams.get('imageUrl') ? decodeURIComponent(urlParams.get('imageUrl')) : '';
-        const customerRequest = urlParams.get('customerRequest') || '未知需求';
+    <div class="content">
+        <!-- 左侧：订单信息 -->
+        <div class="info-panel">
+            <h2>📋 订单信息</h2>
+            <div class="info-item">
+                <span class="info-label">订单号：</span>
+                <span class="info-value" id="orderIdDisplay">加载中...</span>
+            </div>
 
-        // ✅ 这里用你提供的两个 Webhook 生产 URL
-        // 如果要给手机访问，把 localhost 换成你的 ngrok 域名
-        const APPROVE_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/approve-image';
-        const REJECT_WEBHOOK_URL  = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/reject-image';
+            <div class="info-item">
+                <span class="info-label">客户需求：</span>
+                <span class="info-value" id="customerRequestDisplay">加载中...</span>
+            </div>
 
-        // 诊断状态
-        let diagnosticData = {
-            urlFormat: null,
-            urlAccess: null,
-            imageLoad: null
+            <div class="info-item">
+                <span class="info-label">生成时间：</span>
+                <span class="info-value" id="timestampDisplay">加载中...</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">图片URL：</span>
+                <span class="info-value" id="imageUrlDisplay"
+                      style="font-size: 12px; word-break: break-all;">加载中...</span>
+            </div>
+
+            <button class="btn btn-diagnostic" id="toggleDiagnostic">显示诊断信息</button>
+        </div>
+
+        <!-- 右侧：图片预览 + 操作 -->
+        <div class="image-panel">
+            <h2>🖼️ 图片预览</h2>
+            <div class="image-container">
+                <img id="previewImage" src="" alt="AI生成图片">
+                <div class="loading" id="imageLoading">图片加载中...</div>
+                <button class="btn btn-retry" id="retryButton" style="display: none;">🔄 重新加载图片</button>
+
+                <div class="diagnostic-info" id="diagnosticInfo">
+                    <h4>图片诊断信息</h4>
+                    <div class="diagnostic-item" id="urlFormatCheck">URL格式检查：等待中...</div>
+                    <div class="diagnostic-item" id="urlAccessCheck">URL可访问性检查：等待中...</div>
+                    <div class="diagnostic-item" id="imageLoadCheck">图片加载检查：等待中...</div>
+                </div>
+            </div>
+
+            <div class="diagnostic-section" id="detailedDiagnostic">
+                <h3>详细诊断信息</h3>
+                <div id="detailedDiagnosticContent"></div>
+            </div>
+
+            <!-- 修改说明输入框 -->
+            <div class="feedback-panel">
+                <label for="feedbackInput"
+                       style="display:block; margin-bottom:8px; font-weight:bold; color:#2c3e50;">
+                    ✏️ 修改说明（拒绝时必填）
+                </label>
+                <textarea id="feedbackInput"
+                          rows="4"
+                          style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc; resize:vertical;"
+                          placeholder="请写下你希望如何修改这张图片，例如：脸部表情更开心一些、背景简单一点、颜色偏暖色系等等……"></textarea>
+                <div style="font-size:12px; color:#7f8c8d; margin-top:4px;">
+                    提示：点击「要求修改」时，将把这里的内容作为修改说明提交给系统。
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-approve" onclick="approveImage()">✅ 审核通过</button>
+                <button class="btn btn-reject" onclick="rejectImage()">❌ 要求修改</button>
+            </div>
+
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 从URL参数获取数据
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('orderId');
+    const imageUrl = urlParams.get('imageUrl') ? decodeURIComponent(urlParams.get('imageUrl')) : '';
+    const customerRequest = urlParams.get('customerRequest') || '未知需求';
+
+    // 使用你的 ngrok 域名作为 Webhook 生产 URL
+    const APPROVE_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/approve-image';
+    const REJECT_WEBHOOK_URL  = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/reject-image';
+
+    // 诊断状态
+    let diagnosticData = {
+        urlFormat: null,
+        urlAccess: null,
+        imageLoad: null
+    };
+
+    // 验证URL格式
+    function isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    // 检查URL可访问性（HEAD）
+    async function checkUrlAccessibility(url) {
+        try {
+            const response = await fetch(url, { method: 'HEAD' });
+            return response.ok;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    // 用新 Image 检查是否能加载（仅用于诊断，不影响真正的 img）
+    function checkImageLoad(url) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = url;
+        });
+    }
+
+    // 执行诊断
+    async function performDiagnostics() {
+        if (!imageUrl) {
+            updateDiagnosticDisplay('urlFormatCheck', 'error', '未提供图片URL');
+            updateDiagnosticDisplay('urlAccessCheck', 'error', '无法检查');
+            updateDiagnosticDisplay('imageLoadCheck', 'error', '无法检查');
+            return;
+        }
+
+        const urlValid = isValidUrl(imageUrl);
+        diagnosticData.urlFormat = urlValid;
+        updateDiagnosticDisplay('urlFormatCheck', urlValid ? 'success' : 'error',
+            urlValid ? 'URL格式正确' : 'URL格式错误');
+
+        if (!urlValid) return;
+
+        const urlAccessible = await checkUrlAccessibility(imageUrl);
+        diagnosticData.urlAccess = urlAccessible;
+        updateDiagnosticDisplay('urlAccessCheck', urlAccessible ? 'success' : 'error',
+            urlAccessible ? 'URL可访问' : 'URL无法访问');
+
+        if (!urlAccessible) return;
+
+        const imageLoadable = await checkImageLoad(imageUrl);
+        diagnosticData.imageLoad = imageLoadable;
+        updateDiagnosticDisplay('imageLoadCheck', imageLoadable ? 'success' : 'error',
+            imageLoadable ? '图片可以加载（诊断）' : '图片加载失败（诊断）');
+    }
+
+    function updateDiagnosticDisplay(elementId, type, message) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.className = `diagnostic-item ${type}`;
+    }
+
+    function showDetailedDiagnostic() {
+        const content = document.getElementById('detailedDiagnosticContent');
+        content.innerHTML = '';
+
+        if (!imageUrl) {
+            content.innerHTML = '<p>未提供图片URL</p>';
+            return;
+        }
+
+        let html = `
+            <p><strong>图片URL:</strong> ${imageUrl}</p>
+            <p><strong>URL格式:</strong> ${diagnosticData.urlFormat ? '✅ 正确' : '❌ 错误'}</p>
+            <p><strong>URL可访问性:</strong> ${diagnosticData.urlAccess ? '✅ 可访问' : '❌ 不可访问'}</p>
+            <p><strong>图片加载(诊断):</strong> ${diagnosticData.imageLoad ? '✅ 可加载' : '❌ 加载失败'}</p>
+        `;
+
+        content.innerHTML = html;
+        document.getElementById('detailedDiagnostic').style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        // 显示订单信息
+        document.getElementById('orderIdDisplay').textContent = orderId || '未知订单';
+        document.getElementById('customerRequestDisplay').textContent = customerRequest;
+        document.getElementById('timestampDisplay').textContent = new Date().toLocaleString('zh-CN');
+        document.getElementById('imageUrlDisplay').textContent = imageUrl || '无图片URL';
+
+        // 执行诊断 + 加载图片
+        await performDiagnostics();
+        await loadImage();
+
+        document.getElementById('retryButton').addEventListener('click', loadImage);
+
+        document.getElementById('toggleDiagnostic').addEventListener('click', function () {
+            const diagnosticInfo = document.getElementById('diagnosticInfo');
+            const isVisible = diagnosticInfo.style.display === 'block';
+            diagnosticInfo.style.display = isVisible ? 'none' : 'block';
+            this.textContent = isVisible ? '显示诊断信息' : '隐藏诊断信息';
+
+            if (!isVisible) {
+                showDetailedDiagnostic();
+            } else {
+                document.getElementById('detailedDiagnostic').style.display = 'none';
+            }
+        });
+    });
+
+    // 简化后的图片加载逻辑：直接让 <img> 自己去加载
+    async function loadImage() {
+        const img = document.getElementById('previewImage');
+        const loading = document.getElementById('imageLoading');
+        const retryButton = document.getElementById('retryButton');
+
+        img.style.display = 'none';
+        loading.style.display = 'block';
+        loading.textContent = '图片加载中...';
+        loading.style.color = '#7f8c8d';
+        retryButton.style.display = 'none';
+
+        if (!imageUrl) {
+            loading.textContent = '❌ 无有效图片URL';
+            loading.style.color = '#e74c3c';
+            return;
+        }
+
+        img.onload = function () {
+            loading.style.display = 'none';
+            img.style.display = 'block';
+            retryButton.style.display = 'none';
         };
 
-        // 验证URL格式
-        function isValidUrl(string) {
-            try {
-                new URL(string);
-                return true;
-            } catch (_) {
-                return false;
-            }
+        img.onerror = function () {
+            loading.textContent = '❌ 图片加载失败，可能已过期或被删除';
+            loading.style.color = '#e74c3c';
+            retryButton.style.display = 'block';
+        };
+
+        img.src = imageUrl;
+    }
+
+    // 审核通过：跳转到 approve Webhook
+    function approveImage() {
+        const url =
+            `${APPROVE_WEBHOOK_URL}?orderId=${encodeURIComponent(orderId || '')}` +
+            `&status=approved` +
+            `&decisionTime=${encodeURIComponent(new Date().toISOString())}` +
+            `&reviewer=${encodeURIComponent('人工审核员')}` +
+            `&imageUrl=${encodeURIComponent(imageUrl || '')}` +
+            `&customerRequest=${encodeURIComponent(customerRequest || '')}`;
+
+        window.location.href = url;
+    }
+
+    // 要求修改：从 textarea 读取修改说明
+    function rejectImage() {
+        const feedbackEl = document.getElementById('feedbackInput');
+        const feedback = (feedbackEl.value || '').trim();
+
+        if (!feedback) {
+            alert('请输入具体的修改说明，再点击“要求修改”。');
+            feedbackEl.focus();
+            return;
         }
 
-        // 检查URL可访问性
-        async function checkUrlAccessibility(url) {
-            try {
-                const response = await fetch(url, { method: 'HEAD' });
-                return response.ok;
-            } catch (error) {
-                return false;
-            }
+        const url =
+            `${REJECT_WEBHOOK_URL}?orderId=${encodeURIComponent(orderId || '')}` +
+            `&status=rejected` +
+            `&decisionTime=${encodeURIComponent(new Date().toISOString())}` +
+            `&reviewer=${encodeURIComponent('人工审核员')}` +
+            `&imageUrl=${encodeURIComponent(imageUrl || '')}` +
+            `&customerRequest=${encodeURIComponent(customerRequest || '')}` +
+            `&feedback=${encodeURIComponent(feedback)}`;
+
+        window.location.href = url;
+    }
+
+    // 键盘快捷键：1=通过，2=拒绝
+    document.addEventListener('keydown', function (event) {
+        if (event.key === '1') {
+            approveImage();
+        } else if (event.key === '2') {
+            rejectImage();
         }
-
-        // 检查图片加载
-        function checkImageLoad(url) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => resolve(true);
-                img.onerror = () => resolve(false);
-                img.src = url;
-            });
-        }
-
-        // 执行诊断
-        async function performDiagnostics() {
-            if (!imageUrl) {
-                updateDiagnosticDisplay('urlFormatCheck', 'error', '未提供图片URL');
-                updateDiagnosticDisplay('urlAccessCheck', 'error', '无法检查');
-                updateDiagnosticDisplay('imageLoadCheck', 'error', '无法检查');
-                return;
-            }
-            
-            const urlValid = isValidUrl(imageUrl);
-            diagnosticData.urlFormat = urlValid;
-            updateDiagnosticDisplay('urlFormatCheck', urlValid ? 'success' : 'error', 
-                urlValid ? 'URL格式正确' : 'URL格式错误');
-            
-            if (!urlValid) return;
-            
-            const urlAccessible = await checkUrlAccessibility(imageUrl);
-            diagnosticData.urlAccess = urlAccessible;
-            updateDiagnosticDisplay('urlAccessCheck', urlAccessible ? 'success' : 'error', 
-                urlAccessible ? 'URL可访问' : 'URL无法访问');
-            
-            if (!urlAccessible) return;
-            
-            const imageLoadable = await checkImageLoad(imageUrl);
-            diagnosticData.imageLoad = imageLoadable;
-            updateDiagnosticDisplay('imageLoadCheck', imageLoadable ? 'success' : 'error', 
-                imageLoadable ? '图片可以加载' : '图片加载失败');
-        }
-
-        function updateDiagnosticDisplay(elementId, type, message) {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.className = `diagnostic-item ${type}`;
-        }
-
-        function showDetailedDiagnostic() {
-            const content = document.getElementById('detailedDiagnosticContent');
-            content.innerHTML = '';
-            
-            if (!imageUrl) {
-                content.innerHTML = '<p>未提供图片URL</p>';
-                return;
-            }
-            
-            let html = `
-                <p><strong>图片URL:</strong> ${imageUrl}</p>
-                <p><strong>URL格式:</strong> ${diagnosticData.urlFormat ? '✅ 正确' : '❌ 错误'}</p>
-                <p><strong>URL可访问性:</strong> ${diagnosticData.urlAccess ? '✅ 可访问' : '❌ 不可访问'}</p>
-                <p><strong>图片加载:</strong> ${diagnosticData.imageLoad ? '✅ 可加载' : '❌ 加载失败'}</p>
-            `;
-            
-            if (!diagnosticData.urlFormat) {
-                html += '<p><strong>建议:</strong> 检查URL格式是否正确，确保包含协议(http://或https://)</p>';
-            } else if (!diagnosticData.urlAccess) {
-                html += '<p><strong>建议:</strong> 图片可能已被删除或服务器不可用</p>';
-            } else if (!diagnosticData.imageLoad) {
-                html += '<p><strong>建议:</strong> 图片格式可能不受支持或存在跨域限制</p>';
-            } else {
-                html += '<p><strong>诊断结果:</strong> 所有检查通过，图片应该可以正常显示</p>';
-            }
-            
-            content.innerHTML = html;
-            document.getElementById('detailedDiagnostic').style.display = 'block';
-        }
-
-        document.addEventListener('DOMContentLoaded', async function() {
-            document.getElementById('orderIdDisplay').textContent = orderId || '未知订单';
-            document.getElementById('customerRequestDisplay').textContent = customerRequest;
-            document.getElementById('timestampDisplay').textContent = new Date().toLocaleString('zh-CN');
-            document.getElementById('imageUrlDisplay').textContent = imageUrl || '无图片URL';
-            
-            await performDiagnostics();
-            await loadImage();
-            
-            document.getElementById('retryButton').addEventListener('click', loadImage);
-            
-            document.getElementById('toggleDiagnostic').addEventListener('click', function() {
-                const diagnosticInfo = document.getElementById('diagnosticInfo');
-                const isVisible = diagnosticInfo.style.display === 'block';
-                diagnosticInfo.style.display = isVisible ? 'none' : 'block';
-                this.textContent = isVisible ? '显示诊断信息' : '隐藏诊断信息';
-                
-                if (!isVisible) {
-                    showDetailedDiagnostic();
-                } else {
-                    document.getElementById('detailedDiagnostic').style.display = 'none';
-                }
-            });
-        });
-
-        async function loadImage() {
-            const img = document.getElementById('previewImage');
-            const loading = document.getElementById('imageLoading');
-            const retryButton = document.getElementById('retryButton');
-            
-            img.style.display = 'none';
-            loading.style.display = 'block';
-            loading.textContent = '图片加载中...';
-            loading.style.color = '#7f8c8d';
-            retryButton.style.display = 'none';
-            
-            if (!imageUrl) {
-                loading.textContent = '❌ 无有效图片URL';
-                loading.style.color = '#e74c3c';
-                return;
-            }
-            
-            if (!isValidUrl(imageUrl)) {
-                loading.textContent = '❌ 图片URL格式不正确';
-                loading.style.color = '#e74c3c';
-                retryButton.style.display = 'block';
-                return;
-            }
-            
-            const canLoad = await checkImageLoad(imageUrl);
-            if (!canLoad) {
-                loading.textContent = '❌ 图片无法访问，可能已过期或被删除';
-                loading.style.color = '#e74c3c';
-                retryButton.style.display = 'block';
-                return;
-            }
-            
-            img.onload = function() {
-                loading.style.display = 'none';
-                img.style.display = 'block';
-                retryButton.style.display = 'none';
-            };
-            
-            img.onerror = function() {
-                loading.textContent = '❌ 图片加载失败';
-                loading.style.color = '#e74c3c';
-                retryButton.style.display = 'block';
-            };
-            
-            img.src = imageUrl;
-        }
-
-        // 状态提示（目前在 GET 跳转场景用不上，但保留以防后续需要）
-        function showStatus(message, type) {
-            const statusEl = document.getElementById('statusMessage');
-            statusEl.textContent = message;
-            statusEl.className = `status-message ${type}`;
-            statusEl.style.display = 'block';
-            
-            setTimeout(() => {
-                statusEl.style.display = 'none';
-            }, 5000);
-        }
-
-        // ✅ 审核通过：改成 GET 跳转到 n8n Webhook（带上参数）
-        function approveImage() {
-            const url =
-                `${APPROVE_WEBHOOK_URL}?orderId=${encodeURIComponent(orderId || '')}` +
-                `&status=approved` +
-                `&decisionTime=${encodeURIComponent(new Date().toISOString())}` +
-                `&reviewer=${encodeURIComponent('人工审核员')}` +
-                `&imageUrl=${encodeURIComponent(imageUrl || '')}` +
-                `&customerRequest=${encodeURIComponent(customerRequest || '')}`;
-
-            window.location.href = url;
-        }
-
-        // ✅ 要求修改：同样用 GET 跳转，同时带上 feedback
-        function rejectImage() {
-             // 先写一个默认的修改说明，确认链路没问题以后再做输入框
-            const feedback = '审核员：用户要求修改图片，请参考客户需求重新生成。';
-
-            const url =
-                `${REJECT_WEBHOOK_URL}?orderId=${encodeURIComponent(orderId || '')}` +
-                `&status=rejected` +
-                `&decisionTime=${encodeURIComponent(new Date().toISOString())}` +
-                `&reviewer=${encodeURIComponent('人工审核员')}` +
-                `&imageUrl=${encodeURIComponent(imageUrl || '')}` +
-                         `&customerRequest=${encodeURIComponent(customerRequest || '')}` +
-                 `&feedback=${encodeURIComponent(feedback)}`;
-
-    // 和“通过”一样，用跳转方式访问 Webhook
-    window.location.href = url;
-}
-
-
-        // 键盘快捷键
-        document.addEventListener('keydown', function(event) {
-            if (event.key === '1') {
-                approveImage();
-            } else if (event.key === '2') {
-                rejectImage();
-            }
-        });
-    </script>
+    });
+</script>
 </body>
 </html>
-
-
 
 
 
