@@ -209,7 +209,7 @@
         const imageUrl = urlParams.get('imageUrl') ? decodeURIComponent(urlParams.get('imageUrl')) : '';
         const customerRequest = urlParams.get('customerRequest') || '未知需求';
 
-     // 使用ngrok公网地址 + 不同的路径
+// ✅ 更新为新的ngrok URL
 const APPROVE_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/approve';
 const REJECT_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/reject';
 
@@ -354,6 +354,7 @@ const REJECT_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/we
     </script>
 </body>
 </html>
+
 
 
 
