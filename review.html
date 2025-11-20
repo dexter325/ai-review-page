@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI图片审核系统</title>
+    <title>AI图片审核系统 - 连接诊断</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #333;
         }
         
         .container {
@@ -35,321 +36,369 @@
         }
         
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.2em;
             margin-bottom: 10px;
         }
         
-        .content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: white;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .tab-content {
+            display: none;
             padding: 30px;
         }
         
-        @media (max-width: 768px) {
-            .content {
-                grid-template-columns: 1fr;
-            }
+        .tab-content.active {
+            display: block;
         }
         
-        .info-panel, .image-panel {
+        .diagnostic-section {
+            margin-bottom: 30px;
+            padding: 20px;
             background: #f8f9fa;
-            padding: 25px;
             border-radius: 10px;
+        }
+        
+        .diagnostic-section h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        
+        .test-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .result-box {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            color: #27ae60;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .error {
+            color: #e74c3c;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .warning {
+            color: #f39c12;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .info {
+            color: #3498db;
             border-left: 4px solid #3498db;
         }
         
-        .info-item {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .info-label {
-            font-weight: bold;
-            color: #2c3e50;
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .info-value {
-            color: #34495e;
-            word-break: break-all;
-        }
-        
-        .image-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        #previewImage {
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            border: 3px solid #bdc3c7;
-        }
-        
         .action-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
             gap: 15px;
-            margin-top: 30px;
+            margin-top: 20px;
         }
         
         .btn {
-            padding: 15px 25px;
+            padding: 12px 20px;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            transition: all 0.3s;
         }
         
-        .btn-approve {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        .btn-primary {
+            background: #3498db;
             color: white;
         }
         
-        .btn-reject {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
             color: white;
         }
         
         .btn:hover {
+            opacity: 0.9;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         
-        .status-message {
-            padding: 15px;
-            margin: 20px 0;
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online {
+            background: #2ecc71;
+        }
+        
+        .status-offline {
+            background: #e74c3c;
+        }
+        
+        .status-unknown {
+            background: #f39c12;
+        }
+        
+        .url-test {
+            margin: 10px 0;
+            padding: 10px;
+            background: #eee;
             border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
-            display: none;
-        }
-        
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #7f8c8d;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🖼️ AI图片审核系统</h1>
-            <p>请仔细审核生成的AI图片内容</p>
+            <h1>🖼️ AI图片审核系统 - 连接诊断</h1>
+            <p>检测并解决提交失败的问题</p>
         </div>
         
-        <div class="content">
-            <div class="info-panel">
-                <h2>📋 订单信息</h2>
-                <div class="info-item">
-                    <span class="info-label">订单号：</span>
-                    <span class="info-value" id="orderIdDisplay">加载中...</span>
-                </div>
-                
-                <div class="info-item">
-                    <span class="info-label">客户需求：</span>
-                    <span class="info-value" id="customerRequestDisplay">加载中...</span>
-                </div>
-                
-                <div class="info-item">
-                    <span class="info-label">生成时间：</span>
-                    <span class="info-value" id="timestampDisplay">加载中...</span>
-                </div>
-                
-                <div class="info-item">
-                    <span class="info-label">图片URL：</span>
-                    <span class="info-value" id="imageUrlDisplay" style="font-size: 12px; word-break: break-all;">加载中...</span>
-                </div>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('diagnostic')">连接诊断</div>
+            <div class="tab" onclick="switchTab('review')">图片审核</div>
+            <div class="tab" onclick="switchTab('settings')">设置</div>
+        </div>
+        
+        <div id="diagnostic" class="tab-content active">
+            <div class="diagnostic-section">
+                <h3>网络连接测试</h3>
+                <p>测试与ngrok服务器的连接状态</p>
+                <button class="test-button" onclick="testConnection()">测试连接</button>
+                <div id="connection-result" class="result-box">等待测试结果...</div>
             </div>
             
-            <div class="image-panel">
-                <h2>🖼️ 图片预览</h2>
-                <div class="image-container">
-                    <img id="previewImage" src="" alt="AI生成图片" onerror="this.src='https://via.placeholder.com/600x400/ecf0f1/34495e?text=图片加载失败'">
-                    <div class="loading" id="imageLoading">图片加载中...</div>
+            <div class="diagnostic-section">
+                <h3>Webhook端点测试</h3>
+                <p>测试审核通过和要求修改的Webhook端点</p>
+                
+                <div class="url-test">
+                    <strong>审核通过URL:</strong> 
+                    <span id="approve-url">https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/8208c765-fa63-49ec-9c77-642ab9050333</span>
                 </div>
                 
+                <div class="url-test">
+                    <strong>要求修改URL:</strong> 
+                    <span id="reject-url">https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/e9d9ff48-0821-4ad7-b3c9-4ce92583ecfe</span>
+                </div>
+                
+                <button class="test-button" onclick="testWebhook('approve')">测试审核通过端点</button>
+                <button class="test-button" onclick="testWebhook('reject')">测试要求修改端点</button>
+                
+                <div id="webhook-result" class="result-box">等待测试结果...</div>
+            </div>
+            
+            <div class="diagnostic-section">
+                <h3>故障排除建议</h3>
+                <div id="troubleshooting">
+                    <p>1. 确保ngrok正在运行并且会话状态为online</p>
+                    <p>2. 检查Webhook URL是否正确无误</p>
+                    <p>3. 验证n8n中的Webhook节点配置是否正确</p>
+                    <p>4. 检查防火墙或网络设置是否阻止了请求</p>
+                    <p>5. 尝试重新启动ngrok会话获取新的URL</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="review" class="tab-content">
+            <div class="diagnostic-section">
+                <h3>图片审核功能</h3>
+                <p>此功能需要先解决连接问题</p>
                 <div class="action-buttons">
-                    <button class="btn btn-approve" onclick="approveImage()">✅ 审核通过</button>
-                    <button class="btn btn-reject" onclick="rejectImage()">❌ 要求修改</button>
+                    <button class="btn btn-primary" onclick="switchTab('diagnostic')">先进行连接诊断</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="settings" class="tab-content">
+            <div class="diagnostic-section">
+                <h3>配置设置</h3>
+                <p>更新Webhook URL地址</p>
+                
+                <div style="margin: 15px 0;">
+                    <label for="approve-url-input">审核通过URL:</label>
+                    <input type="text" id="approve-url-input" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px;" 
+                           value="https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/8208c765-fa63-49ec-9c77-642ab9050333">
                 </div>
                 
-                <div id="statusMessage" class="status-message"></div>
+                <div style="margin: 15px 0;">
+                    <label for="reject-url-input">要求修改URL:</label>
+                    <input type="text" id="reject-url-input" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px;" 
+                           value="https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/e9d9ff48-0821-4ad7-b3c9-4ce92583ecfe">
+                </div>
+                
+                <button class="btn btn-success" onclick="saveSettings()">保存设置</button>
+                <button class="btn btn-secondary" onclick="resetSettings()">重置为默认</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 从URL参数获取数据
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('orderId');
-        const imageUrl = urlParams.get('imageUrl') ? decodeURIComponent(urlParams.get('imageUrl')) : '';
-        const customerRequest = urlParams.get('customerRequest') || '未知需求';
-
-        // ✅ 已修改：使用ngrok公网地址
-        const APPROVE_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/8208c765-fa63-49ec-9c77-642ab9050333';
-        const REJECT_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/e9d9ff48-0821-4ad7-b3c9-4ce92583ecfe';
-
-        // 页面加载完成后初始化
+        // 切换标签页
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`.tab:nth-child(${tabId === 'diagnostic' ? 1 : tabId === 'review' ? 2 : 3})`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+        
+        // 测试连接
+        async function testConnection() {
+            const resultBox = document.getElementById('connection-result');
+            resultBox.className = 'result-box info';
+            resultBox.innerHTML = '正在测试连接...';
+            
+            try {
+                // 测试基本网络连接
+                const response = await fetch('https://clonally-hastier-sharmaine.ngrok-free.dev', {
+                    method: 'HEAD',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+                
+                if (response.status < 400) {
+                    resultBox.className = 'result-box success';
+                    resultBox.innerHTML = '✅ 连接成功！ngrok服务器可以访问。';
+                } else {
+                    resultBox.className = 'result-box error';
+                    resultBox.innerHTML = '❌ 连接失败。服务器返回状态: ' + response.status;
+                }
+            } catch (error) {
+                resultBox.className = 'result-box error';
+                resultBox.innerHTML = '❌ 连接失败: ' + error.message;
+            }
+        }
+        
+        // 测试Webhook端点
+        async function testWebhook(type) {
+            const resultBox = document.getElementById('webhook-result');
+            resultBox.className = 'result-box info';
+            resultBox.innerHTML = `正在测试${type === 'approve' ? '审核通过' : '要求修改'}端点...`;
+            
+            const url = type === 'approve' ? 
+                document.getElementById('approve-url-input').value : 
+                document.getElementById('reject-url-input').value;
+            
+            try {
+                const testData = {
+                    test: true,
+                    timestamp: new Date().toISOString(),
+                    type: type
+                };
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                if (response.status < 400) {
+                    resultBox.className = 'result-box success';
+                    resultBox.innerHTML = `✅ ${type === 'approve' ? '审核通过' : '要求修改'}端点测试成功！`;
+                } else {
+                    resultBox.className = 'result-box error';
+                    resultBox.innerHTML = `❌ 端点测试失败。服务器返回状态: ${response.status}`;
+                }
+            } catch (error) {
+                resultBox.className = 'result-box error';
+                resultBox.innerHTML = `❌ 端点测试失败: ${error.message}`;
+            }
+        }
+        
+        // 保存设置
+        function saveSettings() {
+            const approveUrl = document.getElementById('approve-url-input').value;
+            const rejectUrl = document.getElementById('reject-url-input').value;
+            
+            localStorage.setItem('approveWebhookUrl', approveUrl);
+            localStorage.setItem('rejectWebhookUrl', rejectUrl);
+            
+            alert('设置已保存！');
+        }
+        
+        // 重置设置
+        function resetSettings() {
+            document.getElementById('approve-url-input').value = 
+                'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/8208c765-fa63-49ec-9c77-642ab9050333';
+            document.getElementById('reject-url-input').value = 
+                'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/e9d9ff48-0821-4ad7-b3c9-4ce92583ecfe';
+            
+            localStorage.removeItem('approveWebhookUrl');
+            localStorage.removeItem('rejectWebhookUrl');
+            
+            alert('设置已重置为默认值！');
+        }
+        
+        // 加载保存的设置
+        function loadSettings() {
+            const approveUrl = localStorage.getItem('approveWebhookUrl');
+            const rejectUrl = localStorage.getItem('rejectWebhookUrl');
+            
+            if (approveUrl) {
+                document.getElementById('approve-url-input').value = approveUrl;
+                document.getElementById('approve-url').textContent = approveUrl;
+            }
+            
+            if (rejectUrl) {
+                document.getElementById('reject-url-input').value = rejectUrl;
+                document.getElementById('reject-url').textContent = rejectUrl;
+            }
+        }
+        
+        // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 显示订单信息
-            document.getElementById('orderIdDisplay').textContent = orderId || '未知订单';
-            document.getElementById('customerRequestDisplay').textContent = customerRequest;
-            document.getElementById('timestampDisplay').textContent = new Date().toLocaleString('zh-CN');
-            document.getElementById('imageUrlDisplay').textContent = imageUrl || '无图片URL';
-            
-            // 加载图片
-            if (imageUrl) {
-                const img = document.getElementById('previewImage');
-                const loading = document.getElementById('imageLoading');
-                
-                img.onload = function() {
-                    loading.style.display = 'none';
-                    img.style.display = 'block';
-                };
-                
-                img.onerror = function() {
-                    loading.textContent = '❌ 图片加载失败';
-                    loading.style.color = '#e74c3c';
-                };
-                
-                img.src = imageUrl;
-            } else {
-                document.getElementById('imageLoading').textContent = '❌ 无有效图片URL';
-            }
-        });
-
-        // 显示状态消息
-        function showStatus(message, type) {
-            const statusEl = document.getElementById('statusMessage');
-            statusEl.textContent = message;
-            statusEl.className = `status-message ${type}`;
-            statusEl.style.display = 'block';
-            
-            setTimeout(() => {
-                statusEl.style.display = 'none';
-            }, 5000);
-        }
-
-        // 审核通过
-        async function approveImage() {
-            showStatus('正在提交审核结果...', 'success');
-            
-            try {
-                // 发送审核结果到n8n
-                const response = await fetch(APPROVE_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'ngrok-skip-browser-warning': 'true' // 添加跳过警告的请求头
-                    },
-                    body: JSON.stringify({
-                        orderId: orderId,
-                        status: 'approved',
-                        decisionTime: new Date().toISOString(),
-                        reviewer: '人工审核员',
-                        imageUrl: imageUrl,
-                        customerRequest: customerRequest
-                    })
-                });
-                
-                if (response.ok) {
-                    showStatus('✅ 审核通过！结果已提交到系统。', 'success');
-                    // 3秒后提示关闭页面
-                    setTimeout(() => {
-                        if (confirm('审核已完成。是否关闭页面？')) {
-                            window.close();
-                        }
-                    }, 2000);
-                } else {
-                    throw new Error('服务器响应错误');
-                }
-            } catch (error) {
-                console.error('提交审核结果失败:', error);
-                showStatus('❌ 提交失败，请重试或联系技术人员。', 'error');
-            }
-        }
-
-        // 要求修改
-        async function rejectImage() {
-            const feedback = prompt('请输入修改要求：', '请调整图片风格/内容...');
-            
-            if (feedback === null) {
-                return; // 用户点击取消
-            }
-            
-            if (!feedback.trim()) {
-                alert('请输入具体的修改要求！');
-                return;
-            }
-            
-            showStatus('正在提交修改要求...', 'success');
-            
-            try {
-                // 发送修改要求到n8n
-                const response = await fetch(REJECT_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'ngrok-skip-browser-warning': 'true' // 添加跳过警告的请求头
-                    },
-                    body: JSON.stringify({
-                        orderId: orderId,
-                        status: 'rejected',
-                        feedback: feedback,
-                        decisionTime: new Date().toISOString(),
-                        reviewer: '人工审核员',
-                        imageUrl: imageUrl,
-                        customerRequest: customerRequest
-                    })
-                });
-                
-                if (response.ok) {
-                    showStatus('✅ 修改要求已提交！系统将重新生成图片。', 'success');
-                    setTimeout(() => {
-                        if (confirm('修改要求已提交。是否关闭页面？')) {
-                            window.close();
-                        }
-                    }, 2000);
-                } else {
-                    throw new Error('服务器响应错误');
-                }
-            } catch (error) {
-                console.error('提交修改要求失败:', error);
-                showStatus('❌ 提交失败，请重试或联系技术人员。', 'error');
-            }
-        }
-
-        // 键盘快捷键支持
-        document.addEventListener('keydown', function(event) {
-            if (event.key === '1') {
-                approveImage();
-            } else if (event.key === '2') {
-                rejectImage();
-            }
+            loadSettings();
         });
     </script>
 </body>
