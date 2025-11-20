@@ -482,14 +482,9 @@
         }
 
         // ✅ 要求修改：同样用 GET 跳转，同时带上 feedback
-        async function rejectImage() {
-            const feedback = prompt('请输入修改要求：', '请调整图片风格/内容...');
-            
-            if (feedback === null) return;
-            if (!feedback.trim()) {
-                alert('请输入具体的修改要求！');
-                return;
-            }
+        function rejectImage() {
+             // 先写一个默认的修改说明，确认链路没问题以后再做输入框
+            const feedback = '审核员：用户要求修改图片，请参考客户需求重新生成。';
 
             const url =
                 `${REJECT_WEBHOOK_URL}?orderId=${encodeURIComponent(orderId || '')}` +
@@ -497,11 +492,13 @@
                 `&decisionTime=${encodeURIComponent(new Date().toISOString())}` +
                 `&reviewer=${encodeURIComponent('人工审核员')}` +
                 `&imageUrl=${encodeURIComponent(imageUrl || '')}` +
-                `&customerRequest=${encodeURIComponent(customerRequest || '')}` +
-                `&feedback=${encodeURIComponent(feedback)}`;
+                         `&customerRequest=${encodeURIComponent(customerRequest || '')}` +
+                 `&feedback=${encodeURIComponent(feedback)}`;
 
-            window.location.href = url;
-        }
+    // 和“通过”一样，用跳转方式访问 Webhook
+    window.location.href = url;
+}
+
 
         // 键盘快捷键
         document.addEventListener('keydown', function(event) {
@@ -514,6 +511,7 @@
     </script>
 </body>
 </html>
+
 
 
 
