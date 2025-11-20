@@ -209,9 +209,9 @@
         const imageUrl = urlParams.get('imageUrl') ? decodeURIComponent(urlParams.get('imageUrl')) : '';
         const customerRequest = urlParams.get('customerRequest') || '未知需求';
 
-     // ✅ 使用ngrok的生产URL
-const APPROVE_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/e9d9ff48-0821-4ad7-b3c9-4ce92583ecfe';
-const REJECT_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/8208c765-fa63-49ec-9c77-642ab9050333';
+     // 使用ngrok公网地址 + 不同的路径
+const APPROVE_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/approve';
+const REJECT_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/reject';
 
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
@@ -354,6 +354,7 @@ const REJECT_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/we
     </script>
 </body>
 </html>
+
 
 
 
