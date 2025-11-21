@@ -79,6 +79,15 @@
             word-break: break-all;
         }
 
+        /* AI 总结内容的样式 */
+        .ai-summary {
+            white-space: pre-wrap;    /* 保留换行 */
+            line-height: 1.6;
+            max-height: 260px;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+
         .image-container {
             text-align: center;
             margin-bottom: 20px;
@@ -137,7 +146,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 30px;
         }
 
         .btn {
@@ -205,23 +214,20 @@
             border-radius: 8px;
             display: none;
         }
-
-        .feedback-panel {
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
         <h1>🖼️ AI图片审核系统</h1>
-        <p>请仔细审核生成的AI图片内容</p>
+        <p>请仔细审核生成的AI图片和订单内容</p>
     </div>
 
     <div class="content">
-        <!-- 左侧：订单信息 -->
+        <!-- 左侧：订单信息 + AI 总结 -->
         <div class="info-panel">
             <h2>📋 订单信息</h2>
+
             <div class="info-item">
                 <span class="info-label">订单号：</span>
                 <span class="info-value" id="orderIdDisplay">加载中...</span>
@@ -239,14 +245,19 @@
 
             <div class="info-item">
                 <span class="info-label">图片URL：</span>
-                <span class="info-value" id="imageUrlDisplay"
-                      style="font-size: 12px; word-break: break-all;">加载中...</span>
+                <span class="info-value" id="imageUrlDisplay" style="font-size: 12px; word-break: break-all;">加载中...</span>
+            </div>
+
+            <!-- 新增：AI 订单总结 -->
+            <div class="info-item">
+                <span class="info-label">AI 订单总结：</span>
+                <pre class="info-value ai-summary" id="aiSummaryDisplay">加载中...</pre>
             </div>
 
             <button class="btn btn-diagnostic" id="toggleDiagnostic">显示诊断信息</button>
         </div>
 
-        <!-- 右侧：图片预览 + 操作 -->
+        <!-- 右侧：图片预览 + 按钮 -->
         <div class="image-panel">
             <h2>🖼️ 图片预览</h2>
             <div class="image-container">
@@ -267,21 +278,6 @@
                 <div id="detailedDiagnosticContent"></div>
             </div>
 
-            <!-- 修改说明输入框 -->
-            <div class="feedback-panel">
-                <label for="feedbackInput"
-                       style="display:block; margin-bottom:8px; font-weight:bold; color:#2c3e50;">
-                    ✏️ 修改说明（拒绝时必填）
-                </label>
-                <textarea id="feedbackInput"
-                          rows="4"
-                          style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc; resize:vertical;"
-                          placeholder="请写下你希望如何修改这张图片，例如：脸部表情更开心一些、背景简单一点、颜色偏暖色系等等……"></textarea>
-                <div style="font-size:12px; color:#7f8c8d; margin-top:4px;">
-                    提示：点击「要求修改」时，将把这里的内容作为修改说明提交给系统。
-                </div>
-            </div>
-
             <div class="action-buttons">
                 <button class="btn btn-approve" onclick="approveImage()">✅ 审核通过</button>
                 <button class="btn btn-reject" onclick="rejectImage()">❌ 要求修改</button>
@@ -297,9 +293,10 @@
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get('orderId');
     const imageUrl = urlParams.get('imageUrl') ? decodeURIComponent(urlParams.get('imageUrl')) : '';
-    const customerRequest = urlParams.get('customerRequest') || '未知需求';
+    const customerRequest = urlParams.get('customerRequest') ? decodeURIComponent(urlParams.get('customerRequest')) : '未知需求';
+    const aiSummary = urlParams.get('aiSummary') ? decodeURIComponent(urlParams.get('aiSummary')) : '';
 
-    // 使用你的 ngrok 域名作为 Webhook 生产 URL
+    // Webhook URLs（这个保持你现在 n8n 配置的那两个）
     const APPROVE_WEBHOOK_URL = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/approve-image';
     const REJECT_WEBHOOK_URL  = 'https://clonally-hastier-sharmaine.ngrok-free.dev/webhook/reject-image';
 
@@ -320,7 +317,7 @@
         }
     }
 
-    // 检查URL可访问性（HEAD）
+    // 检查URL可访问性
     async function checkUrlAccessibility(url) {
         try {
             const response = await fetch(url, { method: 'HEAD' });
@@ -330,9 +327,10 @@
         }
     }
 
-    // 用新 Image 检查是否能加载（仅用于诊断，不影响真正的 img）
+    // 检查图片加载
     function checkImageLoad(url) {
         return new Promise((resolve) => {
+            if (!url) return resolve(false);
             const img = new Image();
             img.onload = () => resolve(true);
             img.onerror = () => resolve(false);
@@ -366,7 +364,7 @@
         const imageLoadable = await checkImageLoad(imageUrl);
         diagnosticData.imageLoad = imageLoadable;
         updateDiagnosticDisplay('imageLoadCheck', imageLoadable ? 'success' : 'error',
-            imageLoadable ? '图片可以加载（诊断）' : '图片加载失败（诊断）');
+            imageLoadable ? '图片可以加载' : '图片加载失败');
     }
 
     function updateDiagnosticDisplay(elementId, type, message) {
@@ -388,27 +386,40 @@
             <p><strong>图片URL:</strong> ${imageUrl}</p>
             <p><strong>URL格式:</strong> ${diagnosticData.urlFormat ? '✅ 正确' : '❌ 错误'}</p>
             <p><strong>URL可访问性:</strong> ${diagnosticData.urlAccess ? '✅ 可访问' : '❌ 不可访问'}</p>
-            <p><strong>图片加载(诊断):</strong> ${diagnosticData.imageLoad ? '✅ 可加载' : '❌ 加载失败'}</p>
+            <p><strong>图片加载:</strong> ${diagnosticData.imageLoad ? '✅ 可加载' : '❌ 加载失败'}</p>
         `;
+
+        if (!diagnosticData.urlFormat) {
+            html += '<p><strong>建议:</strong> 检查URL格式是否正确，确保包含协议(http://或https://)</p>';
+        } else if (!diagnosticData.urlAccess) {
+            html += '<p><strong>建议:</strong> 图片可能已被删除或服务器不可用</p>';
+        } else if (!diagnosticData.imageLoad) {
+            html += '<p><strong>建议:</strong> 图片格式可能不受支持或存在跨域限制</p>';
+        } else {
+            html += '<p><strong>诊断结果:</strong> 所有检查通过，图片应该可以正常显示</p>';
+        }
 
         content.innerHTML = html;
         document.getElementById('detailedDiagnostic').style.display = 'block';
     }
 
-    document.addEventListener('DOMContentLoaded', async function () {
-        // 显示订单信息
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('orderIdDisplay').textContent = orderId || '未知订单';
         document.getElementById('customerRequestDisplay').textContent = customerRequest;
         document.getElementById('timestampDisplay').textContent = new Date().toLocaleString('zh-CN');
         document.getElementById('imageUrlDisplay').textContent = imageUrl || '无图片URL';
 
-        // 执行诊断 + 加载图片
+        // 显示 AI 总结
+        document.getElementById('aiSummaryDisplay').textContent =
+            aiSummary || '暂无AI总结（可能是旧订单或测试链接）';
+
         await performDiagnostics();
         await loadImage();
 
         document.getElementById('retryButton').addEventListener('click', loadImage);
 
-        document.getElementById('toggleDiagnostic').addEventListener('click', function () {
+        document.getElementById('toggleDiagnostic').addEventListener('click', function() {
             const diagnosticInfo = document.getElementById('diagnosticInfo');
             const isVisible = diagnosticInfo.style.display === 'block';
             diagnosticInfo.style.display = isVisible ? 'none' : 'block';
@@ -422,7 +433,7 @@
         });
     });
 
-    // 简化后的图片加载逻辑：直接让 <img> 自己去加载
+    // 加载图片
     async function loadImage() {
         const img = document.getElementById('previewImage');
         const loading = document.getElementById('imageLoading');
@@ -440,14 +451,29 @@
             return;
         }
 
-        img.onload = function () {
+        if (!isValidUrl(imageUrl)) {
+            loading.textContent = '❌ 图片URL格式不正确';
+            loading.style.color = '#e74c3c';
+            retryButton.style.display = 'block';
+            return;
+        }
+
+        const canLoad = await checkImageLoad(imageUrl);
+        if (!canLoad) {
+            loading.textContent = '❌ 图片无法访问，可能已过期或被删除';
+            loading.style.color = '#e74c3c';
+            retryButton.style.display = 'block';
+            return;
+        }
+
+        img.onload = function() {
             loading.style.display = 'none';
             img.style.display = 'block';
             retryButton.style.display = 'none';
         };
 
-        img.onerror = function () {
-            loading.textContent = '❌ 图片加载失败，可能已过期或被删除';
+        img.onerror = function() {
+            loading.textContent = '❌ 图片加载失败';
             loading.style.color = '#e74c3c';
             retryButton.style.display = 'block';
         };
@@ -455,44 +481,107 @@
         img.src = imageUrl;
     }
 
-    // 审核通过：跳转到 approve Webhook
-    function approveImage() {
-        const url =
-            `${APPROVE_WEBHOOK_URL}?orderId=${encodeURIComponent(orderId || '')}` +
-            `&status=approved` +
-            `&decisionTime=${encodeURIComponent(new Date().toISOString())}` +
-            `&reviewer=${encodeURIComponent('人工审核员')}` +
-            `&imageUrl=${encodeURIComponent(imageUrl || '')}` +
-            `&customerRequest=${encodeURIComponent(customerRequest || '')}`;
+    function showStatus(message, type) {
+        const statusEl = document.getElementById('statusMessage');
+        statusEl.textContent = message;
+        statusEl.className = `status-message ${type}`;
+        statusEl.style.display = 'block';
 
-        window.location.href = url;
+        setTimeout(() => {
+            statusEl.style.display = 'none';
+        }, 5000);
     }
 
-    // 要求修改：从 textarea 读取修改说明
-    function rejectImage() {
-        const feedbackEl = document.getElementById('feedbackInput');
-        const feedback = (feedbackEl.value || '').trim();
+    // 审核通过
+    async function approveImage() {
+        showStatus('正在提交审核结果...', 'success');
 
-        if (!feedback) {
-            alert('请输入具体的修改说明，再点击“要求修改”。');
-            feedbackEl.focus();
+        try {
+            const response = await fetch(APPROVE_WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                },
+                body: JSON.stringify({
+                    orderId: orderId,
+                    status: 'approved',
+                    decisionTime: new Date().toISOString(),
+                    reviewer: '人工审核员',
+                    imageUrl: imageUrl,
+                    customerRequest: customerRequest,
+                    aiSummary: aiSummary || null
+                })
+            });
+
+            if (response.ok) {
+                showStatus('✅ 审核通过！结果已提交到系统。', 'success');
+                setTimeout(() => {
+                    if (confirm('审核已完成。是否关闭页面？')) {
+                        window.close();
+                    }
+                }, 2000);
+            } else {
+                throw new Error('服务器响应错误');
+            }
+        } catch (error) {
+            console.error('提交审核结果失败:', error);
+            showStatus('❌ 提交失败，请重试或联系技术人员。', 'error');
+        }
+    }
+
+    // 要求修改
+    async function rejectImage() {
+        const feedback = prompt('请输入修改要求：', '请调整图片风格/内容...');
+
+        if (feedback === null) {
             return;
         }
 
-        const url =
-            `${REJECT_WEBHOOK_URL}?orderId=${encodeURIComponent(orderId || '')}` +
-            `&status=rejected` +
-            `&decisionTime=${encodeURIComponent(new Date().toISOString())}` +
-            `&reviewer=${encodeURIComponent('人工审核员')}` +
-            `&imageUrl=${encodeURIComponent(imageUrl || '')}` +
-            `&customerRequest=${encodeURIComponent(customerRequest || '')}` +
-            `&feedback=${encodeURIComponent(feedback)}`;
+        if (!feedback.trim()) {
+            alert('请输入具体的修改要求！');
+            return;
+        }
 
-        window.location.href = url;
+        showStatus('正在提交修改要求...', 'success');
+
+        try {
+            const response = await fetch(REJECT_WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                },
+                body: JSON.stringify({
+                    orderId: orderId,
+                    status: 'rejected',
+                    feedback: feedback,
+                    decisionTime: new Date().toISOString(),
+                    reviewer: '人工审核员',
+                    imageUrl: imageUrl,
+                    customerRequest: customerRequest,
+                    aiSummary: aiSummary || null
+                })
+            });
+
+            if (response.ok) {
+                showStatus('✅ 修改要求已提交！系统将重新生成图片。', 'success');
+                setTimeout(() => {
+                    if (confirm('修改要求已提交。是否关闭页面？')) {
+                        window.close();
+                    }
+                }, 2000);
+            } else {
+                throw new Error('服务器响应错误');
+            }
+        } catch (error) {
+            console.error('提交修改要求失败:', error);
+            showStatus('❌ 提交失败，请重试或联系技术人员。', 'error');
+        }
     }
 
-    // 键盘快捷键：1=通过，2=拒绝
-    document.addEventListener('keydown', function (event) {
+    // 键盘快捷键
+    document.addEventListener('keydown', function(event) {
         if (event.key === '1') {
             approveImage();
         } else if (event.key === '2') {
