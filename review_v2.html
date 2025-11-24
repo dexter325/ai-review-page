@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>订单详情审核 v2</title>
+<style>
+  body { font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei"; margin: 12px; color:#222; }
+  .card { background:#fff; border:1px solid #eee; border-radius:12px; padding:14px; box-shadow:0 2px 6px rgba(0,0,0,.03); margin-bottom:12px; }
+  .row { margin:6px 0; }
+  .label { color:#666; font-size:13px; }
+  textarea { width:100%; min-height:120px; border:1px solid #ddd; border-radius:10px; padding:10px; font-size:14px; outline:none; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .tile { position:relative; border:1px dashed #ccc; border-radius:10px; height:96px; background:#fafafa; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .tile img { width:100%; height:100%; object-fit:cover; }
+  .plus { font-size:28px; color:#888; }
+  .btns { display:flex; gap:8px; margin-top:12px; }
+  .btn { padding:10px 14px; border-radius:10px; text-decoration:none; color:#fff; display:inline-block; }
+  .btn-primary { background:#1677ff; }
+  .btn-success { background:#28a745; }
+  .btn-light { background:#666; }
+  .hint { color:#888; font-size:12px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="row"><span class="label">订单号：</span><b id="orderId"></b></div>
+    <div class="row"><span class="label">客户原话：</span><span id="customerRequest"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="row"><span class="label">AI 摘要（可直接修改）：</span></div>
+    <div class="row"><textarea id="summary"></textarea></div>
+    <div class="hint">修改后记得点下面的【保存/继续】</div>
+  </div>
+
+  <div class="card">
+    <div class="row"><span class="label">素材图片（最多 9 张）：</span></div>
+    <div id="grid" class="grid"></div>
+    <input id="file" type="file" accept="image/*" multiple style="display:none" />
+    <div class="hint">右下角的「＋」可以添加图片；点图片可放大（新窗口打开源图）。</div>
+  </div>
+
+  <div class="btns">
+    <a id="save" class="btn btn-primary" href="javascript:;">保存 / 继续</a>
+    <a id="approve" class="btn btn-success" href="javascript:;">✅ 通过（直接生成）</a>
+    <a id="cancel" class="btn btn-light" href="javascript:history.back()">返回</a>
+  </div>
+
+<script>
+  // ======= 需要你按实际情况填写的两个地址 =======
+  const N8N_BASE = 'https://clonally-hastier-sharmaine.ngrok-free.dev';
+  const SAVE_CHANGES_WEBHOOK = N8N_BASE + '/webhook/update-order';   // 你新建一个 webhook，用于接收 “保存/继续”
+  const APPROVE_WEBHOOK = N8N_BASE + '/webhook/approve-image';       // 你已有的 approve 节点
+
+  // 解析 URL 参数
+  const q = new URLSearchParams(location.search);
+  const orderId = q.get('orderId') || '';
+  const customerRequest = q.get('customerRequest') || '';
+  const aiSummary = q.get('aiSummary') || '';
+
+  // 可能后续你也会把素材图通过 query 传过来（sourceImages=逗号分隔），先做兜底：
+  const sourceImages = (q.get('sourceImages') || '').split(',').filter(Boolean);
+
+  // 渲染基础信息
+  orderId && (document.getElementById('orderId').textContent = orderId);
+  customerRequest && (document.getElementById('customerRequest').textContent = customerRequest);
+  document.getElementById('summary').value = aiSummary;
+
+  // 网格：最多 9 宫格
+  const grid = document.getElementById('grid');
+  const fileInput = document.getElementById('file');
+  const images = [...sourceImages]; // 本地临时数组，仅做预览
+
+  function renderGrid() {
+    grid.innerHTML = '';
+    images.forEach((url, idx) => {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.className = 'tile';
+      a.innerHTML = `<img src="${url}" alt="img-${idx}" />`;
+      grid.appendChild(a);
+    });
+
+    // 右下角“＋”位：当还没到 9 张时显示
+    if (images.length < 9) {
+      const add = document.createElement('div');
+      add.className = 'tile';
+      add.innerHTML = `<span class="plus">＋</span>`;
+      add.onclick = ()=> fileInput.click();
+      grid.appendChild(add);
+    }
+  }
+  renderGrid();
+
+  // 选择文件后的预览（只做预览；真正上传在“保存/继续”时完成）
+  const pendingFiles = [];
+  fileInput.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(f => {
+      if (images.length + pendingFiles.length < 9) pendingFiles.push(f);
+    });
+    // 用本地临时 URL 预览新图片
+    pendingFiles.forEach(f => images.push(URL.createObjectURL(f)));
+    renderGrid();
+    fileInput.value = '';
+  });
+
+  // 保存/继续 -> 把摘要 + 新图片传给 n8n
+  document.getElementById('save').onclick = async () => {
+    try {
+      const fd = new FormData();
+      fd.append('orderId', orderId);
+      fd.append('aiSummary', document.getElementById('summary').value);
+      // 追加新选择的文件（参数名用 files[]）
+      pendingFiles.forEach(f => fd.append('files[]', f, f.name));
+
+      const res = await fetch(SAVE_CHANGES_WEBHOOK, { method: 'POST', body: fd });
+      const data = await res.json().catch(()=> ({}));
+      alert(data?.message || '保存成功（n8n 已收到变更）');
+      // 清空待上传队列
+      pendingFiles.length = 0;
+    } catch (err) {
+      console.error(err);
+      alert('保存失败，请稍后重试');
+    }
+  };
+
+  // 通过 -> 调用 approve webhook（把最新摘要也带回去）
+  document.getElementById('approve').onclick = async () => {
+    try {
+      const payload = {
+        orderId,
+        aiSummary: document.getElementById('summary').value
+      };
+      await fetch(APPROVE_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      alert('已提交通过。你可以回到 n8n 查看后续节点执行。');
+    } catch (err) {
+      console.error(err);
+      alert('提交失败，请稍后重试');
+    }
+  };
+</script>
+</body>
+</html>
